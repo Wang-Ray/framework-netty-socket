@@ -6,6 +6,13 @@
 	<groupId>com.allinpay.io</groupId>
 	<artifactId>socket</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jar.source>1.6</jar.source>
+		<jar.target>1.6</jar.target>
+		<netty.version>5.0.0.Alpha1</netty.version>
+		<!-- <netty.version>4.0.28.Final</netty.version> -->
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -20,7 +27,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.0.28.Final</version>
+			<version>${netty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -29,5 +36,17 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<source>${jar.source}</source>
+					<target>${jar.target}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
