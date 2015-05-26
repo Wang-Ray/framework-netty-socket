@@ -7,8 +7,13 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinaSocketServer {
+	
+	static Logger logger = LoggerFactory.getLogger(MinaSocketServer.class);
+	
 	public static void main(String[] args) throws Exception {
 		// 创建一个非阻塞的Server端Socket,用NIO
 		SocketAcceptor acceptor = new NioSocketAcceptor();
@@ -22,6 +27,6 @@ public class MinaSocketServer {
 		int bindPort = 9988;
 		// 绑定端口,启动服务器
 		acceptor.bind(new InetSocketAddress(bindPort));
-		System.out.println("Mina Server is Listing on:= " + bindPort);
+		logger.info("Mina Server is Listing on:= " + bindPort);
 	}
 }

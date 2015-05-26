@@ -7,8 +7,12 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinaSocketClient {
+
+	static Logger logger = LoggerFactory.getLogger(MinaSocketClient.class);
 
 	public static void main(String[] args) throws Exception {
 
