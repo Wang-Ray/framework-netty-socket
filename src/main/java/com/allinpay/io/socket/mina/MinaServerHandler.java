@@ -19,7 +19,8 @@ public class MinaServerHandler extends IoHandlerAdapter {
 	// 当一个连接关闭时
 	@Override
 	public void sessionClosed(IoSession session) {
-		session.write("server says：我走啦........");
+		// 已经无法发送消息了，所以下面这句无效
+		// session.write("server says：我走啦........");
 		logger.debug("disconnect!" + session.getRemoteAddress());
 	}
 
