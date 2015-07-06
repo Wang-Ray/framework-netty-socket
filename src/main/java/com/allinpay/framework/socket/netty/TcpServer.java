@@ -3,9 +3,12 @@ package com.allinpay.framework.socket.netty;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -14,9 +17,17 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class TcpServer {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(TcpServer.class);
+
 	private volatile EventLoopGroup bossGroup;
 
 	private volatile EventLoopGroup workerGroup;
@@ -38,7 +49,7 @@ public final class TcpServer {
 	/**
 	 * 心跳
 	 */
-	private String heartbeatMessage;
+	private String heartbeatMessage = "0000";
 
 	/**
 	 * 是否答复心跳
@@ -69,13 +80,31 @@ public final class TcpServer {
 
 		bootstrap.channel(NioServerSocketChannel.class)
 				.option(ChannelOption.SO_BACKLOG, 1024)
-				.handler(new LoggingHandler(LogLevel.DEBUG));
+				.handler(new ChannelInitializer<ServerChannel>() {
+					@Override
+					protected void initChannel(ServerChannel ch)
+							throws Exception {
+						ch.pipeline()
+								.addLast(new LoggingHandler(LogLevel.DEBUG))
+								.addLast(new NettyServerHandler1());
+					}
+				});
 
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG))
-						.addLast(new LineBasedFrameDecoder(1024))
+				ch.pipeline()
+						.addLast(new ChannelHandlerAdapter() {
+							@Override
+							public void channelActive(ChannelHandlerContext ctx)
+									throws Exception {
+								InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx
+										.channel().remoteAddress();
+								logger.info("连接成功："
+										+ inetSocketAddress.getHostName() + ":"
+										+ inetSocketAddress.getPort());
+							}
+						}).addLast(new LineBasedFrameDecoder(1024))
 						.addLast(new StringDecoder())
 						.addLast(new ServerBizHandler(heartbeatMessage));
 			}

@@ -1,9 +1,14 @@
 package com.allinpay.framework.socket.netty.test;
 
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
 import java.io.IOException;
 
 import org.junit.Test;
 
+import com.allinpay.framework.socket.netty.ClientBizHandler;
 import com.allinpay.framework.socket.netty.TcpClient;
 import com.allinpay.framework.socket.netty.TcpServer;
 
@@ -83,40 +88,43 @@ public class TestTcp {
 		TcpServer server = new TcpServer("127.0.0.1", 8080);
 		TcpClient client = new TcpClient("127.0.0.1", 8080);
 
-		System.out.println("==========Start Server First==========");
+		client.setHearbeatInterval(3);
+		client.setReConnnectInterval(3 * 1000);
+
 		server.init();
 		client.init();
+		Thread.sleep(300000);
+
+		client.close();
+		// 正常关闭
+		server.close();
+		Thread.sleep(2000);
+	}
+
+	@Test
+	public void TestTcpClient() throws IOException, InterruptedException {
+		TcpServer server = new TcpServer("127.0.0.1", 8080);
+		TcpClient client = new TcpClient("127.0.0.1", 8080);
+
+		client.setHearbeatInterval(3);
+		client.setReConnnectInterval(3 * 1000);
+
+		server.init();
+		client.init();
+
+		client.getChannel().pipeline().addLast(new LineBasedFrameDecoder(1024))
+				.addLast(new StringDecoder())
+				.addLast(new StringEncoder())
+				.addLast(new ClientBizHandler());
+
+		client.getChannel().writeAndFlush(
+				"3333" + System.getProperty("line.separator"));
+
 		Thread.sleep(30000);
 
 		client.close();
 		// 正常关闭
 		server.close();
 		Thread.sleep(2000);
-
-		System.out.println("==========Start Client First==========");
-		// client.init();
-		// server.init();
-		// Thread.sleep(20000);
-		//
-		// client.close();
-		// server.close();
-		// Thread.sleep(2000);
-
-		System.out.println("==========Client Auto Reconnect==========");
-		// server.init();
-		// client.init();
-		// Thread.sleep(2000);
-
-		// server.close();
-		// 客户端会不断重连
-		// Thread.sleep(10000);
-		//
-		// server.init();
-		// Thread.sleep(2000);
-		//
-		// client.close();
-		// server.close();
-		//
-		// System.in.read();
 	}
 }

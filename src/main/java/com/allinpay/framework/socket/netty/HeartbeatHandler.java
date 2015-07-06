@@ -26,19 +26,16 @@ public class HeartbeatHandler extends ChannelHandlerAdapter {
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
 			throws Exception {
-		logger.debug("userEventTriggered");
 		if (evt instanceof IdleStateEvent) {
 			IdleStateEvent e = (IdleStateEvent) evt;
 			if (e.state() == IdleState.ALL_IDLE) {
-				ctx.writeAndFlush(Unpooled
-						.copiedBuffer((heartbeatMessage + System
-								.getProperty("line.separator")).getBytes()));
+				ctx.writeAndFlush(Unpooled.copiedBuffer((heartbeatMessage
+                        + System.getProperty("line.separator")).getBytes()));
 				logger.info("发送心跳消息：" + heartbeatMessage);
 			}
 		} else {
 			ctx.fireUserEventTriggered(evt);
 		}
-
 	}
 
 }

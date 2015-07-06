@@ -1,6 +1,7 @@
 package com.allinpay.framework.socket.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -12,8 +13,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
@@ -56,6 +56,8 @@ public class TcpClient {
 
 	private volatile Bootstrap bootstrap;
 
+	private ChannelFuture channelFuture;
+
 	public TcpClient(String remoteHost, int remotePort) {
 		this.remoteServerHost = remoteHost;
 		this.remoteServerPort = remotePort;
@@ -75,7 +77,7 @@ public class TcpClient {
 			@Override
 			public void initChannel(SocketChannel ch) throws Exception {
 				ch.pipeline()
-						.addLast(new LoggingHandler(LogLevel.DEBUG))
+						// 定时重连
 						.addLast(new ChannelHandlerAdapter() {
 							@Override
 							public void channelInactive(
@@ -83,12 +85,14 @@ public class TcpClient {
 								logger.error("连接被关闭：" + getServerInfo());
 								scheduleConnect();
 							}
-						}).addLast(new LineBasedFrameDecoder(1024))
-						.addLast(new StringDecoder())
-						.addLast(new ClientBizHandler())
+						})
 						// 下面两个handler用于心跳
 						.addLast(new IdleStateHandler(0, 0, hearbeatInterval))
-						.addLast(new HeartbeatHandler(heartbeatMessage));
+						.addLast(new HeartbeatHandler(heartbeatMessage))
+						.addLast(new LineBasedFrameDecoder(1024))
+						.addLast(new StringDecoder())
+						.addLast(new StringEncoder())
+						.addLast(new ClientBizHandler());
 			}
 		});
 
@@ -97,15 +101,15 @@ public class TcpClient {
 
 	private void doConnect() {
 		logger.info("开始连接：" + getServerInfo());
-		ChannelFuture future = bootstrap.connect(new InetSocketAddress(
+		channelFuture = bootstrap.connect(new InetSocketAddress(
 				remoteServerHost, remoteServerPort));
 
-		future.addListener(new ChannelFutureListener() {
+		channelFuture.addListener(new ChannelFutureListener() {
 			public void operationComplete(ChannelFuture f) throws Exception {
 				if (f.isSuccess()) {
 					logger.info("连接成功：" + getServerInfo());
 				} else {
-					logger.error("连接失败：" + getServerInfo());
+					logger.error("连接失败：" + getServerInfo() + "，原因：" + f.cause());
 					// 启动连接失败时定时重连
 					scheduleConnect();
 				}
@@ -126,8 +130,23 @@ public class TcpClient {
 	}
 
 	private String getServerInfo() {
-		return String.format("RemoteServerHost=%s RemoteServerPort=%d",
-				remoteServerHost, remoteServerPort);
+		return String.format("%s:%d", remoteServerHost, remoteServerPort);
+	}
+
+	public EventLoopGroup getWorkerGroup() {
+		return workerGroup;
+	}
+
+	public Bootstrap getBootstrap() {
+		return bootstrap;
+	}
+
+	public ChannelFuture getChannelFuture() {
+		return channelFuture;
+	}
+
+	public Channel getChannel() {
+		return channelFuture.channel();
 	}
 
 	public String getRemoteServerHost() {

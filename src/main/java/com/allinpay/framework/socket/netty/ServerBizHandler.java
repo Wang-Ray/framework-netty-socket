@@ -26,12 +26,17 @@ public class ServerBizHandler extends ChannelHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
-		logger.debug("channelRead");
 		String message = (String) msg;
-		logger.debug(message);
+		logger.debug("收到消息：" + message);
 		if (heartbeatMessage.startsWith("1111")) {
 			ctx.close();
 		}
 	}
 
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		logger.warn("发生异常：" + cause);
+		// 释放资源
+		ctx.close();
+	}
 }
