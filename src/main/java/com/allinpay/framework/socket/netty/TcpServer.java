@@ -79,7 +79,7 @@ public final class TcpServer {
 		bootstrap.group(bossGroup, workerGroup);
 
 		bootstrap.channel(NioServerSocketChannel.class)
-				.option(ChannelOption.SO_BACKLOG, 1024)
+				.option(ChannelOption.SO_BACKLOG, 128)
 				.handler(new ChannelInitializer<ServerChannel>() {
 					@Override
 					protected void initChannel(ServerChannel ch)
@@ -100,11 +100,13 @@ public final class TcpServer {
 									throws Exception {
 								InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx
 										.channel().remoteAddress();
-								logger.info("连接成功："
-										+ inetSocketAddress.getHostName() + ":"
+								logger.info("被连接成功："
+										+ inetSocketAddress.getAddress()
+												.getHostAddress() + ":"
 										+ inetSocketAddress.getPort());
 							}
-						}).addLast(new LineBasedFrameDecoder(1024))
+						}).addLast(new NettyServerChildHandler1())
+						.addLast(new LineBasedFrameDecoder(1024))
 						.addLast(new StringDecoder())
 						.addLast(new ServerBizHandler(heartbeatMessage));
 			}
