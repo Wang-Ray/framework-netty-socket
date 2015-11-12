@@ -1,4 +1,4 @@
-package com.allinpay.framework.socket.netty.test;
+package com.allinpay.framework.socket.netty.test.asciilength;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.allinpay.framework.socket.netty;
+package com.allinpay.framework.socket.netty.test;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
