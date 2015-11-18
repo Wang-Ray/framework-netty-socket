@@ -1,8 +1,6 @@
-package com.allinpay.framework.socket.netty.test.asciilength;
+package com.allinpay.framework.socket.netty.client.main;
 
 import com.allinpay.framework.socket.netty.AsciiLengthFieldBasedFrameDecoder;
-import com.allinpay.framework.socket.netty.client.main.ClientBizHandler;
-import com.allinpay.framework.socket.netty.client.main.ClientHeartbeatHandler;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -20,7 +18,7 @@ public class ClientChannelHandlerInitializer extends ChannelInitializer<SocketCh
 
 		ClientHeartbeatHandler clientHeartbeatHandler = new ClientHeartbeatHandler();
 		clientHeartbeatHandler.setHeartBeatRequestSent("ping");
-		ch.pipeline().addLast(new IdleStateHandler(0, 0, hearbeatInterval)).addLast(clientHeartbeatHandler)
+		ch.pipeline().addLast(new IdleStateHandler(0, hearbeatInterval, 0)).addLast(clientHeartbeatHandler)
 				.addLast(new AsciiLengthFieldBasedFrameDecoder(1024, 0, 4, 0, 4)).addLast(new ClientBizHandler());
 
 	}

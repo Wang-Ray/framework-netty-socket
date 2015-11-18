@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.allinpay.framework.socket.netty.Constants;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -14,18 +16,15 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class TcpServer {
+public class NettyTcpServer {
 
-	private static final Logger logger = LoggerFactory.getLogger(TcpServer.class);
-
-	public static final String NOT_SUPPORT_MULTI_CONNECTION = "0";
-
-	public static final String SUPPORT_MULTI_CONNECTION = "1";
+	private static final Logger logger = LoggerFactory.getLogger(NettyTcpServer.class);
 
 	private EventLoopGroup bossGroup;
 
@@ -34,53 +33,50 @@ public class TcpServer {
 	private ServerBootstrap bootstrap;
 
 	/**
-	 * 服务端监听本地地址
+	 * 服务端监听地址
 	 */
 	private String localHost;
 
 	/**
-	 * 服务端监听本地端口
+	 * 服务端监听端口
 	 */
 	private int localPort;
 
 	/**
-	 * 心跳
+	 * 同一个端口是否支持多连接
 	 */
-	private String heartbeatMessage = "0000";
-
-	/**
-	 * 是否答复心跳
-	 */
-	private boolean whetherReturnHeartbeat;
-
-	private String whetherMultiConnection = SUPPORT_MULTI_CONNECTION;
+	private String whetherMultiConnection = Constants.SUPPORT_MULTI_CONNECTION;
 
 	/**
 	 * 服务端Channel，负责监听
 	 */
 	private Channel serverChannel;
 
-	private ChannelHandler serverChannelHandler;
+	/**
+	 * 服务端业务处理器
+	 */
+	private ChannelHandler serverChannelHandlerInitializer;
 
-	public TcpServer(String localHost, int localPort) {
-		this.localHost = localHost;
-		this.localPort = localPort;
-	}
-
+	/**
+	 * 关闭服务
+	 */
 	public void close() {
-
 		bossGroup.shutdownGracefully();
 		workerGroup.shutdownGracefully();
-
-		logger.info("Stopped Tcp Server: " + localPort);
+		logger.info("Stopped Netty Tcp Server: " + localHost + ":" + localPort);
 	}
 
+	/**
+	 * 初始化并启动监听
+	 */
 	public void init() {
 
 		bossGroup = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
 		bootstrap = new ServerBootstrap();
 		bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
+
+		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
 
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
@@ -91,7 +87,7 @@ public class TcpServer {
 						InetSocketAddress remoteInetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
 						logger.info("连接被关闭：" + remoteInetSocketAddress.getAddress().getHostAddress() + ":"
 								+ remoteInetSocketAddress.getPort() + " -> " + localHost + ":" + localPort);
-						if (NOT_SUPPORT_MULTI_CONNECTION.equals(whetherMultiConnection)) {
+						if (Constants.NOT_SUPPORT_MULTI_CONNECTION.equals(whetherMultiConnection)) {
 							// 连接断开，开启绑定监听
 							doBind();
 						}
@@ -102,12 +98,12 @@ public class TcpServer {
 						InetSocketAddress remoteInetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
 						logger.info("被连接成功：" + remoteInetSocketAddress.getAddress().getHostAddress() + ":"
 								+ remoteInetSocketAddress.getPort() + " -> " + localHost + ":" + localPort);
-						if (NOT_SUPPORT_MULTI_CONNECTION.equals(whetherMultiConnection)) {
+						if (Constants.NOT_SUPPORT_MULTI_CONNECTION.equals(whetherMultiConnection)) {
 							// 连接建立，取消绑定监听
 							unBind();
 						}
 					}
-				}).addLast(serverChannelHandler);
+				}).addLast(serverChannelHandlerInitializer);
 			}
 		});
 
@@ -135,7 +131,7 @@ public class TcpServer {
 						public void run() {
 							doBind();
 						}
-					}, 1, TimeUnit.SECONDS);
+					}, Constants.RE_BIND_INTERVAL, TimeUnit.SECONDS);
 				}
 			}
 		});
@@ -175,20 +171,20 @@ public class TcpServer {
 		this.localPort = localPort;
 	}
 
-	public String getHeartbeatMessage() {
-		return heartbeatMessage;
+	public ChannelHandler getServerChannelHandlerInitializer() {
+		return serverChannelHandlerInitializer;
 	}
 
-	public void setHeartbeatMessage(String heartbeatMessage) {
-		this.heartbeatMessage = heartbeatMessage;
+	public void setServerChannelHandlerInitializer(ChannelHandler serverChannelHandlerInitializer) {
+		this.serverChannelHandlerInitializer = serverChannelHandlerInitializer;
 	}
 
-	public ChannelHandler getServerChannelHandler() {
-		return serverChannelHandler;
+	public String getWhetherMultiConnection() {
+		return whetherMultiConnection;
 	}
 
-	public void setServerChannelHandler(ChannelHandler serverChannelHandler) {
-		this.serverChannelHandler = serverChannelHandler;
+	public void setWhetherMultiConnection(String whetherMultiConnection) {
+		this.whetherMultiConnection = whetherMultiConnection;
 	}
 
 }

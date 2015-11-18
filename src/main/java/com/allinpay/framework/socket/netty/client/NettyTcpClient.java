@@ -18,11 +18,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
 
-public class TcpClient {
+public class NettyTcpClient {
 
-	private static final Logger logger = LoggerFactory.getLogger(TcpClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(NettyTcpClient.class);
 
 	/**
 	 * 远程服务端地址
@@ -35,17 +34,9 @@ public class TcpClient {
 	private int remoteServerPort;
 
 	/**
-	 * 心跳消息
-	 */
-	private String heartbeatMessage = "0000";
-
-	/**
-	 * 心跳时间间隔，单位：秒，小于0则无心跳
-	 */
-	private int hearbeatInterval = 0;
-
-	/**
 	 * 重连时间间隔，单位：毫秒
+	 * 
+	 * 注：小于等于0则不需要重连
 	 */
 	private long reConnnectInterval = 3 * 1000L;
 
@@ -55,30 +46,16 @@ public class TcpClient {
 
 	private ChannelFuture channelFuture;
 
-	private ChannelHandler clientChannelHandler;
-
-	public TcpClient(String remoteHost, int remotePort) {
-		this.remoteServerHost = remoteHost;
-		this.remoteServerPort = remotePort;
-	}
+	private ChannelHandler clientChannelHandlerInitializer;
 
 	public void close() {
 		workerGroup.shutdownGracefully();
 	}
 
-	public ChannelHandler getClientChannelHandler() {
-		return clientChannelHandler;
-	}
-
-	public void setClientChannelHandler(ChannelHandler clientChannelHandler) {
-		this.clientChannelHandler = clientChannelHandler;
-	}
-
 	public void init() {
 		workerGroup = new NioEventLoopGroup();
 		bootstrap = new Bootstrap();
-		bootstrap.group(workerGroup);
-		bootstrap.channel(NioSocketChannel.class);
+		bootstrap.group(workerGroup).channel(NioSocketChannel.class);
 
 		bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 			@Override
@@ -93,13 +70,7 @@ public class TcpClient {
 						scheduleConnect();
 					}
 				});
-				// 下面两个handler用于心跳
-				if (hearbeatInterval > 0) {
-					ch.pipeline().addLast(new IdleStateHandler(0, 0, hearbeatInterval))
-							.addLast(new HeartbeatHandler(heartbeatMessage));
-				}
-
-				ch.pipeline().addLast(clientChannelHandler);
+				ch.pipeline().addLast(clientChannelHandlerInitializer);
 			}
 		});
 		doConnect();
@@ -128,12 +99,14 @@ public class TcpClient {
 	 * 定时重连
 	 */
 	private void scheduleConnect() {
-		workerGroup.schedule(new Runnable() {
-			@Override
-			public void run() {
-				doConnect();
-			}
-		}, reConnnectInterval, TimeUnit.MILLISECONDS);
+		if (reConnnectInterval > 0) {
+			workerGroup.schedule(new Runnable() {
+				@Override
+				public void run() {
+					doConnect();
+				}
+			}, reConnnectInterval, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	private String getServerInfo() {
@@ -172,28 +145,20 @@ public class TcpClient {
 		this.remoteServerPort = remoteServerPort;
 	}
 
-	public String getHeartbeatMessage() {
-		return heartbeatMessage;
-	}
-
-	public void setHeartbeatMessage(String heartbeatMessage) {
-		this.heartbeatMessage = heartbeatMessage;
-	}
-
-	public int getHearbeatInterval() {
-		return hearbeatInterval;
-	}
-
-	public void setHearbeatInterval(int hearbeatInterval) {
-		this.hearbeatInterval = hearbeatInterval;
-	}
-
 	public long getReConnnectInterval() {
 		return reConnnectInterval;
 	}
 
 	public void setReConnnectInterval(long reConnnectInterval) {
 		this.reConnnectInterval = reConnnectInterval;
+	}
+
+	public ChannelHandler getClientChannelHandlerInitializer() {
+		return clientChannelHandlerInitializer;
+	}
+
+	public void setClientChannelHandlerInitializer(ChannelHandler clientChannelHandlerInitializer) {
+		this.clientChannelHandlerInitializer = clientChannelHandlerInitializer;
 	}
 
 }
