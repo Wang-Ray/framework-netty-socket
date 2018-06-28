@@ -1,4 +1,4 @@
-package com.allinpay.framework.socket.netty.client;
+package com.allinpay.io.framework.netty.socket.client;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -44,8 +44,6 @@ public class NettyTcpClient {
 
 	private volatile Bootstrap bootstrap;
 
-	private ChannelFuture channelFuture;
-
 	private ChannelHandler clientChannelHandlerInitializer;
 
 	public void close() {
@@ -64,10 +62,15 @@ public class NettyTcpClient {
 				ch.pipeline().addLast(new ChannelHandlerAdapter() {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-						InetSocketAddress localInetSocketAddress = (InetSocketAddress) ctx.channel().localAddress();
-						logger.error("连接被关闭：" + localInetSocketAddress.getAddress().getHostAddress() + ":"
-								+ localInetSocketAddress.getPort() + " -> " + getServerInfo());
+						logger.error("连接被关闭" + ctx.channel().toString());
 						scheduleConnect();
+					}
+
+					@Override
+					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+						logger.warn("发生异常，关闭连接" + ctx.channel().toString(), cause);
+						// 断开连接
+						ctx.close();
 					}
 				});
 				ch.pipeline().addLast(clientChannelHandlerInitializer);
@@ -78,9 +81,7 @@ public class NettyTcpClient {
 
 	private void doConnect() {
 		logger.info("开始连接：" + getServerInfo());
-		channelFuture = bootstrap.connect(new InetSocketAddress(remoteServerHost, remoteServerPort));
-
-		channelFuture.addListener(new ChannelFutureListener() {
+		bootstrap.connect(new InetSocketAddress(remoteServerHost, remoteServerPort)).addListener(new ChannelFutureListener() {
 			public void operationComplete(ChannelFuture f) throws Exception {
 				if (f.isSuccess()) {
 					InetSocketAddress localInetSocketAddress = (InetSocketAddress) f.channel().localAddress();
@@ -119,14 +120,6 @@ public class NettyTcpClient {
 
 	public Bootstrap getBootstrap() {
 		return bootstrap;
-	}
-
-	public ChannelFuture getChannelFuture() {
-		return channelFuture;
-	}
-
-	public Channel getChannel() {
-		return channelFuture.channel();
 	}
 
 	public String getRemoteServerHost() {

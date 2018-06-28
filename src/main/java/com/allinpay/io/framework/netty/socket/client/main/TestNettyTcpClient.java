@@ -1,8 +1,8 @@
-package com.allinpay.framework.socket.netty.client.main;
+package com.allinpay.io.framework.netty.socket.client.main;
 
 import java.io.IOException;
 
-import com.allinpay.framework.socket.netty.client.NettyTcpClient;
+import com.allinpay.io.framework.netty.socket.client.NettyTcpClient;
 
 public class TestNettyTcpClient {
 
@@ -10,6 +10,8 @@ public class TestNettyTcpClient {
 
 		int port = 8099;
 		String host = "localhost";
+//		String host = "192.168.107.203";
+//		String host = "192.168.103.13";
 		if (args != null && args.length > 0) {
 			try {
 				host = args[0];

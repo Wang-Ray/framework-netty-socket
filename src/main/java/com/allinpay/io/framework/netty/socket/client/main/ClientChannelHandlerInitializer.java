@@ -1,7 +1,8 @@
-package com.allinpay.framework.socket.netty.client.main;
+package com.allinpay.io.framework.netty.socket.client.main;
 
-import com.allinpay.framework.socket.netty.AsciiLengthFieldBasedFrameDecoder;
+import com.allinpay.io.framework.netty.socket.AsciiLengthFieldBasedFrameDecoder;
 
+import com.allinpay.io.framework.netty.socket.AsciiLengthFieldPrepender;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -11,15 +12,16 @@ public class ClientChannelHandlerInitializer extends ChannelInitializer<SocketCh
 	/**
 	 * 心跳时间间隔，单位：秒，小于0则无心跳
 	 */
-	private int hearbeatInterval = 10;
+	private int hearbeatInterval = 0;
 
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 
 		ClientHeartbeatHandler clientHeartbeatHandler = new ClientHeartbeatHandler();
-		clientHeartbeatHandler.setHeartBeatRequestSent("ping");
+		clientHeartbeatHandler.setHeartBeatRequestSent("0000");
 		ch.pipeline().addLast(new IdleStateHandler(0, hearbeatInterval, 0)).addLast(clientHeartbeatHandler)
-				.addLast(new AsciiLengthFieldBasedFrameDecoder(1024, 0, 4, 0, 4)).addLast(new ClientBizHandler());
+				.addLast(new AsciiLengthFieldPrepender(8))
+				.addLast(new AsciiLengthFieldBasedFrameDecoder(99999999, 0, 8, 0, 8)).addLast(new ClientBizHandler());
 
 	}
 

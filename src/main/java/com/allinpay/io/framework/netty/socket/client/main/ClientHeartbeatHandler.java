@@ -1,4 +1,6 @@
-package com.allinpay.framework.socket.netty.client.main;
+package com.allinpay.io.framework.netty.socket.client.main;
+
+import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +40,32 @@ public class ClientHeartbeatHandler extends ChannelHandlerAdapter {
 		if (evt instanceof IdleStateEvent) {
 			IdleStateEvent e = (IdleStateEvent) evt;
 			if (e.state() == IdleState.READER_IDLE) {
-				logger.info("read idle.");
+				InetSocketAddress remoteInetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+				InetSocketAddress localInetSocketAddress = (InetSocketAddress) ctx.channel().localAddress();
+
+				logger.warn(new StringBuilder(42).append("读空闲，关闭连接：")
+						.append(remoteInetSocketAddress.getAddress().getHostAddress()).append(":")
+						.append(remoteInetSocketAddress.getPort()).append(" -> ")
+						.append(localInetSocketAddress.getAddress().getHostAddress()).append(":")
+						.append(localInetSocketAddress.getPort()).toString());
 				ctx.close();
 			} else if (e.state() == IdleState.WRITER_IDLE) {
+				logger.info(ctx.channel().isActive() + "");
 				logger.info("write idle.");
-				if (null != heartBeatRequestSent) {
-					logger.info("发送心跳请求消息：" + heartBeatRequestSent);
-					ctx.writeAndFlush(heartBeatRequestSent);
-				}
+				// if (null != heartBeatRequestSent) {
+				// logger.info("发送心跳请求消息：" + heartBeatRequestSent);
+				// ctx.writeAndFlush(Unpooled.copiedBuffer(((String)heartBeatRequestSent).getBytes())).addListener(new
+				// ChannelFutureListener() {
+				// public void operationComplete(ChannelFuture f) throws
+				// Exception {
+				// if (f.isSuccess()) {
+				// logger.info("发送成功");
+				// } else {
+				// logger.error("发送失败",f.cause());
+				// }
+				// }
+				// });
+				// }
 			} else {
 				logger.info("all idle.");
 				if (null != heartBeatRequestSent) {

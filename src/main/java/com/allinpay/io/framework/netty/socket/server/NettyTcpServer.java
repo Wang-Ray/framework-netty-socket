@@ -1,4 +1,4 @@
-package com.allinpay.framework.socket.netty.server;
+package com.allinpay.io.framework.netty.socket.server;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.allinpay.framework.socket.netty.Constants;
+import com.allinpay.io.framework.netty.socket.Constants;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -21,6 +21,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 public class NettyTcpServer {
 
@@ -71,16 +73,18 @@ public class NettyTcpServer {
 	 */
 	public void init() {
 
-		bossGroup = new NioEventLoopGroup();
-		workerGroup = new NioEventLoopGroup();
+		bossGroup = new NioEventLoopGroup(1);
+		workerGroup = new NioEventLoopGroup(2);
 		bootstrap = new ServerBootstrap();
 		bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
 
 		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+		bootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
 
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
+				ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
 				ch.pipeline().addLast(new ChannelHandlerAdapter() {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {

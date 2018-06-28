@@ -1,4 +1,6 @@
-package com.allinpay.framework.socket.netty.server.main;
+package com.allinpay.io.framework.netty.socket.server.main;
+
+import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +23,23 @@ public class ServerBizHandler extends ChannelHandlerAdapter {
 		String body = new String(req);
 		logger.info("server received and replyed the same: " + body);
 
-		ByteBuf resp = Unpooled.copiedBuffer((stuffString(body.length() + "", 4, true, '0') + body).getBytes());
+//		ByteBuf resp = Unpooled.copiedBuffer((stuffString(body.length() + "", 4, true, '0') + body).getBytes());
+		ByteBuf resp = Unpooled.copiedBuffer(body.getBytes());
 		ctx.writeAndFlush(resp);
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		logger.warn("发生异常：" + cause);
+		InetSocketAddress remoteInetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+		InetSocketAddress localInetSocketAddress = (InetSocketAddress) ctx.channel().localAddress();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("异常发生，关闭连接：").append(remoteInetSocketAddress.getAddress().getHostAddress()).append(":")
+				.append(remoteInetSocketAddress.getPort()).append(" -> ")
+				.append(localInetSocketAddress.getAddress().getHostAddress()).append(":")
+				.append(localInetSocketAddress.getPort());
+		logger.warn(sb.length() + "");
+		logger.warn(sb.toString(), cause);
 		// 断开连接
 		ctx.close();
 	}

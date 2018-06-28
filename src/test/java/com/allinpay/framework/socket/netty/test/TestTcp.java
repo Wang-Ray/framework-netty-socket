@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.allinpay.framework.socket.netty.client.NettyTcpClient;
-import com.allinpay.framework.socket.netty.server.NettyTcpServer;
+import com.allinpay.io.framework.netty.socket.client.NettyTcpClient;
+import com.allinpay.io.framework.netty.socket.server.NettyTcpServer;
 
 public class TestTcp {
 	@Test

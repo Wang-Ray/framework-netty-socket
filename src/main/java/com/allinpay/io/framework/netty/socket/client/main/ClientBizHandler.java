@@ -1,10 +1,14 @@
-package com.allinpay.framework.socket.netty.client.main;
+package com.allinpay.io.framework.netty.socket.client.main;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -13,11 +17,21 @@ public class ClientBizHandler extends ChannelHandlerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(ClientBizHandler.class);
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) {
-		String msg = "0016QUERY TIME ORDER";
-		logger.info("client sent: " + msg);
-		ctx.writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+	public void channelActive(ChannelHandlerContext ctx) throws DecoderException {
+		String msg = "FFF4FFFD06";
+		ByteBuf resp = Unpooled.copiedBuffer(msg.getBytes());
 
+		logger.info("client sent: " + msg);
+		ChannelFuture channelFuture = ctx.writeAndFlush(resp);
+		channelFuture.addListener(new ChannelFutureListener() {
+			public void operationComplete(ChannelFuture f) throws Exception {
+				if (f.isSuccess()) {
+					logger.info("发送成功");
+				} else {
+					logger.error("发送失败");
+				}
+			}
+		});
 	}
 
 	@Override
@@ -29,16 +43,8 @@ public class ClientBizHandler extends ChannelHandlerAdapter {
 		String body = new String(req);
 		logger.info("client received: " + body);
 
-		// ByteBuf resp = Unpooled.copiedBuffer((stuffString(body.length() + "",
-		// 4, true, '0') + body).getBytes());
-		// ctx.writeAndFlush(resp);
-	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		logger.warn("发生异常：" + cause);
-		// 断开连接
-		ctx.close();
+//		 ByteBuf resp = Unpooled.copiedBuffer(body.getBytes());
+//		 ctx.writeAndFlush(resp);
 	}
 
 	/**

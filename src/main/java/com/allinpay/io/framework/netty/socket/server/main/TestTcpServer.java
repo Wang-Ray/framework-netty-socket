@@ -1,9 +1,9 @@
-package com.allinpay.framework.socket.netty.server.main;
+package com.allinpay.io.framework.netty.socket.server.main;
 
 import java.io.IOException;
 
-import com.allinpay.framework.socket.netty.Constants;
-import com.allinpay.framework.socket.netty.server.NettyTcpServer;
+import com.allinpay.io.framework.netty.socket.Constants;
+import com.allinpay.io.framework.netty.socket.server.NettyTcpServer;
 
 public class TestTcpServer {
 
@@ -31,6 +31,8 @@ public class TestTcpServer {
 		server.setServerChannelHandlerInitializer(ServerChannelHandlerInitializer);
 
 		server.init();
+//		Thread.sleep(30*1000);
+//		server.close();
 
 	}
 

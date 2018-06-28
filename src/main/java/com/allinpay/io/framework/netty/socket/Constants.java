@@ -1,4 +1,4 @@
-package com.allinpay.framework.socket.netty;
+package com.allinpay.io.framework.netty.socket;
 
 public class Constants {
 	/**

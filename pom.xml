@@ -12,8 +12,14 @@
 		<jar.target>1.6</jar.target>
 		<netty.version>5.0.0.Alpha1</netty.version>
 		<!-- <netty.version>4.0.28.Final</netty.version> -->
+		<commons-codec.version>1.10</commons-codec.version>
 	</properties>
 	<dependencies>
+		<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec.version}</version>
+			</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
