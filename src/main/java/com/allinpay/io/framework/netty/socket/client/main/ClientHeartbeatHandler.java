@@ -2,6 +2,7 @@ package com.allinpay.io.framework.netty.socket.client.main;
 
 import java.net.InetSocketAddress;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-public class ClientHeartbeatHandler extends ChannelHandlerAdapter {
+public class ClientHeartbeatHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClientHeartbeatHandler.class);
 

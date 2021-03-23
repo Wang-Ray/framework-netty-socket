@@ -3,21 +3,13 @@ package com.allinpay.io.framework.netty.socket.server;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.allinpay.io.framework.netty.socket.Constants;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -32,7 +24,7 @@ public class NettyTcpServer {
 
 	private EventLoopGroup workerGroup;
 
-	private ServerBootstrap bootstrap;
+	private ServerBootstrap serverBootstrap;
 
 	/**
 	 * 服务端监听地址
@@ -73,19 +65,19 @@ public class NettyTcpServer {
 	 */
 	public void init() {
 
-		bossGroup = new NioEventLoopGroup(1);
-		workerGroup = new NioEventLoopGroup(2);
-		bootstrap = new ServerBootstrap();
-		bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
+		bossGroup = new NioEventLoopGroup();
+		workerGroup = new NioEventLoopGroup();
+		serverBootstrap = new ServerBootstrap();
+		serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
 
-		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-		bootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
+		serverBootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+		serverBootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
 
-		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
+		serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
 				ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
-				ch.pipeline().addLast(new ChannelHandlerAdapter() {
+				ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 						InetSocketAddress remoteInetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
@@ -119,7 +111,7 @@ public class NettyTcpServer {
 	 */
 	protected void doBind() {
 		logger.debug("start to listening: " + localHost + ":" + localPort);
-		bootstrap.bind(localHost, localPort).addListener(new ChannelFutureListener() {
+		serverBootstrap.bind(localHost, localPort).addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture bindChannelFuture) throws Exception {
 				if (bindChannelFuture.isSuccess()) {

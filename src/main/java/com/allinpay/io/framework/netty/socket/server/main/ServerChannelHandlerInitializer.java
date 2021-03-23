@@ -14,14 +14,31 @@ public class ServerChannelHandlerInitializer extends ChannelInitializer<SocketCh
      */
     private int hearbeatInterval = 0;
 
+    private int lengthFieldLength = 4;
+
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ServerHeartbeatHandler serverHeartbeatHandler = new ServerHeartbeatHandler();
         serverHeartbeatHandler.setHeartBeatRequestReceived("0000");
         ch.pipeline().addLast(new IdleStateHandler(hearbeatInterval, 0, 0))
-                .addLast(new AsciiLengthFieldBasedFrameDecoder(99999999, 0, 8, 0, 8)).addLast(serverHeartbeatHandler)
-                .addLast(new AsciiLengthFieldPrepender(8))
+                .addLast(new AsciiLengthFieldBasedFrameDecoder(99999999, 0, lengthFieldLength, 0, lengthFieldLength)).addLast(serverHeartbeatHandler)
+                .addLast(new AsciiLengthFieldPrepender(lengthFieldLength))
                 .addLast(new ServerBizHandler());
     }
 
+    public int getHearbeatInterval() {
+        return hearbeatInterval;
+    }
+
+    public void setHearbeatInterval(int hearbeatInterval) {
+        this.hearbeatInterval = hearbeatInterval;
+    }
+
+    public int getLengthFieldLength() {
+        return lengthFieldLength;
+    }
+
+    public void setLengthFieldLength(int lengthFieldLength) {
+        this.lengthFieldLength = lengthFieldLength;
+    }
 }

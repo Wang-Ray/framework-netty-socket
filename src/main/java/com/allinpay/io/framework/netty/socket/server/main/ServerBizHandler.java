@@ -2,15 +2,15 @@ package com.allinpay.io.framework.netty.socket.server.main;
 
 import java.net.InetSocketAddress;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
-public class ServerBizHandler extends ChannelHandlerAdapter {
+public class ServerBizHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServerBizHandler.class);
 

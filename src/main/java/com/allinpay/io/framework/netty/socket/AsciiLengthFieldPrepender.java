@@ -23,28 +23,7 @@ public class AsciiLengthFieldPrepender extends MessageToMessageEncoder<ByteBuf> 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         int length = msg.readableBytes();
-        out.add(ctx.alloc().buffer(lengthFieldLength).writeBytes(stuffString(String.valueOf(length), lengthFieldLength, true, '0').getBytes()));
+        out.add(ctx.alloc().buffer(lengthFieldLength).writeBytes(Utils.stuffString(String.valueOf(length), lengthFieldLength, true, '0').getBytes()));
         out.add(msg.retain());
-    }
-
-    public static String stuffString(String src, int len, boolean stuffHead, char padding) {
-        if (len <= 0) {
-            return src;
-        }
-        if (null == src) {
-            src = "";
-        }
-        int srcLen = src.length();
-        StringBuffer buf = new StringBuffer(len);
-        int paddingLen = len - srcLen;
-        for (int i = 0; i < paddingLen; i++) {
-            buf.append(padding);
-        }
-        if (stuffHead) {
-            buf.append(src);
-        } else {
-            buf.insert(0, src);
-        }
-        return buf.toString();
     }
 }

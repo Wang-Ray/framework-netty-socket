@@ -3,18 +3,11 @@ package com.allinpay.io.framework.netty.socket.client;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -59,7 +52,7 @@ public class NettyTcpClient {
 			@Override
 			public void initChannel(SocketChannel ch) throws Exception {
 				// 定时重连
-				ch.pipeline().addLast(new ChannelHandlerAdapter() {
+				ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 						logger.error("连接被关闭" + ctx.channel().toString());

@@ -1,12 +1,12 @@
 package com.allinpay.framework.socket.netty.test;
 
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientBizHandler extends ChannelHandlerAdapter {
+public class ClientBizHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ClientBizHandler.class);
