@@ -9,7 +9,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import java.nio.ByteOrder;
 
 /**
- * Ascii长度域添加解码器
+ * Ascii长度域去除解码器
  *
  */
 public class AsciiLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecoder {
