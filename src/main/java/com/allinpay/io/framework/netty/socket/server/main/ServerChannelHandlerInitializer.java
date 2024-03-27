@@ -21,7 +21,7 @@ public class ServerChannelHandlerInitializer extends ChannelInitializer<SocketCh
         ServerHeartbeatHandler serverHeartbeatHandler = new ServerHeartbeatHandler();
         serverHeartbeatHandler.setHeartBeatRequestReceived("0000");
         ch.pipeline().addLast(new IdleStateHandler(hearbeatInterval, 0, 0))
-                .addLast(new AsciiLengthFieldBasedFrameDecoder(99999999, 0, lengthFieldLength, 0, lengthFieldLength)).addLast(serverHeartbeatHandler)
+                .addLast(new AsciiLengthFieldBasedFrameDecoder(9999, 0, lengthFieldLength, 0, lengthFieldLength)).addLast(serverHeartbeatHandler)
                 .addLast(new AsciiLengthFieldPrepender(lengthFieldLength))
                 .addLast(new ServerBizHandler());
     }

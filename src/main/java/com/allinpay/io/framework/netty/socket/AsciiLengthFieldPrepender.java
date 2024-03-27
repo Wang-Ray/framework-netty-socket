@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ public class AsciiLengthFieldPrepender extends MessageToMessageEncoder<ByteBuf> 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         int length = msg.readableBytes();
-        out.add(ctx.alloc().buffer(lengthFieldLength).writeBytes(Utils.stuffString(String.valueOf(length), lengthFieldLength, true, '0').getBytes()));
+        out.add(ctx.alloc().buffer(lengthFieldLength).writeBytes(String.format("%0"+lengthFieldLength+"d", length).getBytes(StandardCharsets.US_ASCII)));
         out.add(msg.retain());
     }
 }

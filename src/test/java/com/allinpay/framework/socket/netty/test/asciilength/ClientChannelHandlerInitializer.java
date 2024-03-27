@@ -1,7 +1,6 @@
 package com.allinpay.framework.socket.netty.test.asciilength;
 
 import com.allinpay.io.framework.netty.socket.AsciiLengthFieldBasedFrameDecoder;
-import com.allinpay.io.framework.netty.socket.client.main.ClientBizHandler;
 import com.allinpay.io.framework.netty.socket.client.main.ClientHeartbeatHandler;
 
 import io.netty.channel.ChannelInitializer;

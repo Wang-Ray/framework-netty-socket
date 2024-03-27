@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Ascii长度域去除解码器
@@ -32,6 +33,6 @@ public class AsciiLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDeco
     protected long getUnadjustedFrameLength(ByteBuf buf, int offset, int length, ByteOrder order) {
         byte[] len = new byte[length];
         buf.getBytes(offset, len);
-        return Long.parseLong(new String(len));
+        return Long.parseLong(new String(len, StandardCharsets.US_ASCII));
     }
 }

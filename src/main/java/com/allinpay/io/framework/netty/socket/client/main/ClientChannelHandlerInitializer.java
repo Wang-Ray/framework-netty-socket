@@ -23,7 +23,7 @@ public class ClientChannelHandlerInitializer extends ChannelInitializer<SocketCh
 		clientHeartbeatHandler.setHeartBeatRequestSent("0000");
 		ch.pipeline().addLast(new IdleStateHandler(0, hearbeatInterval, 0)).addLast(clientHeartbeatHandler)
 				.addLast(new AsciiLengthFieldPrepender(lengthFieldLength))
-				.addLast(new AsciiLengthFieldBasedFrameDecoder(99999999, 0, lengthFieldLength, 0, lengthFieldLength)).addLast(new ClientBizHandler());
+				.addLast(new AsciiLengthFieldBasedFrameDecoder(9999, 0, lengthFieldLength, 0, lengthFieldLength)).addLast(new ClientBizHandler());
 
 	}
 
